@@ -16,54 +16,25 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
+func init() {
+	prometheus.MustRegister(requestsCounter)
+}
+
+var version string = os.Getenv("VERSION")
+
 var listenAddr = flag.String("listen address",  ":8080", "The address to listen on for web requests")
 var checkAddr  = flag.String("check address",   ":8090", "The address to listen on for live and ready checks.")
 var metricAddr = flag.String("metrics address", ":9090", "The address to listen on for metric pulls.")
 
-var inFlightGauge = prometheus.NewGauge(
-	prometheus.GaugeOpts{
-		Name: "in_flight_requests",
-		Help: "A gauge of requests currently being served by the wrapped handler.",
-	})
-
-var counter = prometheus.NewCounterVec(
+var requestsCounter = prometheus.NewCounterVec(
 	prometheus.CounterOpts{
 		Name: "http_requests_total",
-		Help: "A counter for requests to the wrapped handler.",
+		Help: "A counter for received requests",
 		ConstLabels: map[string]string{
 			"version": version,
 		},
 	},
 	[]string{"code", "method"})
-
-var duration = prometheus.NewHistogramVec(
-	prometheus.HistogramOpts{
-		Name:    "request_duration_seconds",
-		Help:    "A histogram of latencies for requests.",
-		Buckets: []float64{.25, .5, 1, 2.5, 5, 10},
-		ConstLabels: map[string]string{
-			"version": version,
-		},
-	},
-	[]string{"code", "method"})
-
-var responseSize = prometheus.NewHistogramVec(
-	prometheus.HistogramOpts{
-		Name:    "response_size_bytes",
-		Help:    "A histogram of response sizes for requests.",
-		Buckets: []float64{200, 500, 900, 1500},
-		ConstLabels: map[string]string{
-			"version": version,
-		},
-	},
-	[]string{"code", "method"})
-
-var version string
-
-func init() {
-	prometheus.MustRegister(inFlightGauge, counter, duration, responseSize)
-	version = os.Getenv("VERSION")
-}
 
 func serveHttp(s *http.Server) {
 	log.Printf("Server started at %s", s.Addr)
@@ -97,13 +68,7 @@ func httpHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func promRequestHandler(handler http.Handler) http.Handler {
-	return promhttp.InstrumentHandlerInFlight(inFlightGauge,
-		promhttp.InstrumentHandlerDuration(duration,
-			promhttp.InstrumentHandlerCounter(counter,
-				promhttp.InstrumentHandlerResponseSize(responseSize, handler),
-			),
-		),
-	)
+	return promhttp.InstrumentHandlerCounter(requestsCounter, handler)
 }
 
 func main() {
