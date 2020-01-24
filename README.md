@@ -24,9 +24,13 @@ Update the webapp by setting a new version string
 
 During the update access the webapp multiple times and see different answers coming from different versions of the application.
 
-The use Prometheus and Grafana to disply the number of http requests received and ordered by versions.
+Then use Prometheus and Grafana to display the number of http requests received and ordered by versions.
 
-The following query should be used to see the requests ordered by version
+In Grafana, add a Prometheus data source url
+
+    http://prometheus-server
+
+And use the following query to see the requests ordered by `{{version}}`
 
     sum(rate(http_requests_total{run="webapp"}[5m])) by (version)
 
