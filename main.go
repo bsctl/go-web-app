@@ -4,6 +4,7 @@ import (
 	"context"
 	"flag"
 	"fmt"
+	"net"
 	"net/http"
 	"os"
 	"os/signal"
@@ -58,13 +59,22 @@ func serveMetrics(addr string) {
 	}
 }
 
-func httpHandler(w http.ResponseWriter, r *http.Request) {
-	hostname, err := os.Hostname()
+func httpHandler(w http.ResponseWriter, req *http.Request) {
+	var hostname, remoteAddress string
+	var err error
+	hostname, err = os.Hostname()
 	if err != nil {
 		fmt.Fprintf(w, "Error getting hostname\n")
 		return
 	}
-	fmt.Fprintf(w, "Host: %s, Version: %s\n", hostname, version)
+	remoteAddress, _, err = net.SplitHostPort(req.RemoteAddr)
+	if err != nil {
+		fmt.Fprintf(w, "Error getting remote address\n")
+		return
+	}
+	fmt.Fprintf(w,
+		"Server name: %s\nServer version: %s\nRemote client address: %s\n",
+		hostname, version, remoteAddress)
 }
 
 func promRequestHandler(handler http.Handler) http.Handler {
