@@ -23,9 +23,9 @@ func init() {
 
 var version string = os.Getenv("VERSION")
 
-var listenAddr = flag.String("listen address",  ":8080", "The address to listen on for web requests")
-var checkAddr  = flag.String("check address",   ":8090", "The address to listen on for live and ready checks.")
-var metricAddr = flag.String("metrics address", ":9090", "The address to listen on for metric pulls.")
+var listenAddr = flag.String("listen", ":8080", "The address to listen on for web requests")
+var checkAddr  = flag.String("check",  ":8090", "The address to listen on for live and ready checks.")
+var metricAddr = flag.String("metric", ":9090", "The address to listen on for metric pulls.")
 
 var requestsCounter = prometheus.NewCounterVec(
 	prometheus.CounterOpts{
