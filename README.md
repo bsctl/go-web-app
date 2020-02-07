@@ -1,10 +1,10 @@
 # An example of demo webapp.
 Use this webapp to demostrate the deployment strategies in Kubernetes.
 
-The app exposes three ports:
+The app exposes ports:
 
 - 8080 for http requests on the "/" path.
-- 8090 for readiness and liveness probes on the "/ready", and "live" paths, respectively.
+- 8080 for readiness and liveness probes on the "/ready", and "live" paths, respectively.
 - 9090 for Prometheus metrics on "/metrics" path.
 
 The exposed metrics are the http_requests_total counter.
