@@ -4,15 +4,14 @@ import (
 	"context"
 	"flag"
 	"fmt"
+	"log"
 	"net"
 	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
-	"log"
 
-	"github.com/heptiolabs/healthcheck"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
@@ -24,7 +23,6 @@ func init() {
 var version string = os.Getenv("VERSION")
 
 var listenAddr = flag.String("listen", ":8080", "The address to listen on for web requests")
-var checkAddr  = flag.String("check",  ":8090", "The address to listen on for live and ready checks.")
 var metricAddr = flag.String("metric", ":9090", "The address to listen on for metric pulls.")
 
 var requestsCounter = prometheus.NewCounterVec(
@@ -37,17 +35,10 @@ var requestsCounter = prometheus.NewCounterVec(
 	},
 	[]string{"code", "method"})
 
-func serveHttp(s *http.Server) {
+func serveHTTP(s *http.Server) {
 	log.Printf("Server started at %s", s.Addr)
 	if err := s.ListenAndServe(); err != nil {
 		log.Printf("Starting server failed")
-	}
-}
-
-func serveChecks(addr string, health healthcheck.Handler) {
-	log.Printf("Serving checks on port %s", addr)
-	if err := http.ListenAndServe(addr, health); err != nil {
-		log.Printf("Starting checks listener failed")
 	}
 }
 
@@ -77,7 +68,11 @@ func httpHandler(w http.ResponseWriter, req *http.Request) {
 		hostname, version, remoteAddress)
 }
 
-func promRequestHandler(handler http.Handler) http.Handler {
+func probeHandler(w http.ResponseWriter, req *http.Request) {
+	fmt.Fprintf(w, "ok")
+}
+
+func metricsHandler(handler http.Handler) http.Handler {
 	return promhttp.InstrumentHandlerCounter(requestsCounter, handler)
 }
 
@@ -93,20 +88,18 @@ func main() {
 	quit := make(chan os.Signal)
 	signal.Notify(quit, syscall.SIGTERM, syscall.SIGINT)
 
-	// health checks
-	healthz := healthcheck.NewHandler()
-
 	// mux
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", httpHandler)
+	mux.HandleFunc("/ready", probeHandler)
+	mux.HandleFunc("/live", probeHandler)
 
 	srv := &http.Server{
-		Addr: *listenAddr,
-		Handler: promRequestHandler(mux),
+		Addr:    *listenAddr,
+		Handler: metricsHandler(mux),
 	}
 
-	go serveHttp(srv)
-	go serveChecks(*checkAddr, healthz)
+	go serveHTTP(srv)
 	go serveMetrics(*metricAddr)
 
 	<-quit
@@ -116,4 +109,3 @@ func main() {
 	defer cancel()
 	srv.Shutdown(ctx)
 }
-

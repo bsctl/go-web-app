@@ -41,7 +41,7 @@ spec:
           containerPort: 8080
           protocol: TCP
         - name: probe
-          containerPort: 8090
+          containerPort: 8080
           protocol: TCP
         - name: metrics
           containerPort: 9090
@@ -49,13 +49,13 @@ spec:
         readinessProbe:
           httpGet:
             path: /ready
-            port: 8090
+            port: 8080
             scheme: HTTP
           initialDelaySeconds: 20
           periodSeconds: 10
         livenessProbe:
           httpGet:
             path: /live
-            port: 8090
+            port: 8080
             scheme: HTTP
           periodSeconds: 15
