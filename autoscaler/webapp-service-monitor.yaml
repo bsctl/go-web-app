@@ -1,0 +1,14 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  labels:
+    monitoring: "true"
+  name: webapp-metrics
+  namespace:
+spec:
+  endpoints:
+  - path: /metrics
+    port: metrics
+  selector:
+    matchLabels:
+      run: webapp

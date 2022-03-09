@@ -1,0 +1,20 @@
+prometheus:
+  url: http://mon-kube-prometheus-stack-prometheus.monitoring-system.svc
+  port: 9090
+metricsRelistInterval: 60s
+logLevel: 4
+# for details on rules configuration, please sse:
+# https://github.com/kubernetes-sigs/prometheus-adapter/blob/master/docs/config.md
+rules:
+  default: false
+  custom:
+   - seriesQuery: '{__name__=~"^http_requests_total$",container!="POD",namespace!="",pod!=""}'
+     resources:
+       overrides:
+         namespace: { resource: "namespace" }
+         pod: { resource: "pod" }
+     name:
+       matches: "http_requests_total"
+       as: "http_requests_per_seconds"
+     metricsQuery: sum(rate(<<.Series>>{<<.LabelMatchers>>}[3m])) by (<<.GroupBy>>)
+     
