@@ -150,6 +150,14 @@ From the most basic perspective, the `HorizontalPodAutoscaler` controller operat
 desiredReplicas = ceil[currentReplicas * ( currentMetricValue / desiredMetricValue )]
 ```
 
+In our example above, the `targetCPUUtilizationPercentage` is set to 80%. But 80% of what, exactly?
+
+The process running inside a container is guaranteed the amount of CPU requested through the resource requests specified for the container. But at times when no other processes need CPU, the process may use all the available CPU on the node.
+
+When say a pod is consuming 80% of the CPU, it’s not clear if it means 80% of the node’s CPU, 80% of the pod’s guaranteed CPU (the resource request), or 80% of the hard limit configured for the pod through resource limits.
+
+As far as the HPA is concerned, only the pod’s guaranteed CPU amount, i.e. the CPU requests is important when determining the CPU utilization of a pod. The autoscaler compares the pod’s actual CPU consumption and its CPU requests, which means the pods need to have CPU requests set for the HPA to determine the CPU utilization percentage.
+
 ## Autoscaling on multiple metrics
 Introduce additional metrics to use when autoscaling the webapp deploy by making use of the `autoscaling/v2beta2` API version. With Kubernetes 1.23+, use `autoscaling/v2` API version:
 
