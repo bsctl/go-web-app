@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"runtime"
 	"syscall"
 	"time"
 
@@ -68,6 +69,29 @@ func httpHandler(w http.ResponseWriter, req *http.Request) {
 		hostname, version, remoteAddress)
 }
 
+func loadHandler(w http.ResponseWriter, req *http.Request) {
+	ncpu := runtime.NumCPU()
+	runtime.GOMAXPROCS(ncpu)
+	quit := make(chan bool)
+	for i := 0; i < ncpu; i++ {
+		go func() {
+			for {
+				select {
+				case <-quit:
+					return
+				default:
+				}
+			}
+		}()
+	}
+
+	time.Sleep(10 * time.Second)
+	for i := 0; i < ncpu; i++ {
+		fmt.Fprintf(w, "Loading CPU: %d\n", i)
+		quit <- true
+	}
+}
+
 func probeHandler(w http.ResponseWriter, req *http.Request) {
 	fmt.Fprintf(w, "ok")
 }
@@ -91,6 +115,7 @@ func main() {
 	// mux
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", httpHandler)
+	mux.HandleFunc("/load", loadHandler)
 	mux.HandleFunc("/ready", probeHandler)
 	mux.HandleFunc("/live", probeHandler)
 

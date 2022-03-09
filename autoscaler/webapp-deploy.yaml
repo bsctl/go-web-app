@@ -1,0 +1,76 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+  name: webapp
+  namespace:
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      run: webapp
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+    type: RollingUpdate
+  progressDeadlineSeconds: 300
+  revisionHistoryLimit: 3
+  template:
+    metadata:
+      labels:
+        run: webapp
+    spec:
+      containers:
+      - image: bsctl/go-web-app:latest
+        name: webapp
+        env:
+        - name: VERSION
+          value: v1.0.0
+        resources:
+          requests:
+            cpu: 100m
+        ports:
+        - name: http
+          containerPort: 8080
+          protocol: TCP
+        - name: metrics
+          containerPort: 9090
+          protocol: TCP
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: 8080
+            scheme: HTTP
+          initialDelaySeconds: 20
+          periodSeconds: 10
+        livenessProbe:
+          httpGet:
+            path: /live
+            port: 8080
+            scheme: HTTP
+          periodSeconds: 15
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: webapp
+  labels:
+    run: webapp
+  namespace:
+spec:
+  ports:
+  - name: http
+    protocol: TCP
+    port: 80
+    targetPort: 8080
+  - name: metrics
+    protocol: TCP
+    port: 9090
+    targetPort: 9090
+  selector:
+    run: webapp
+  type: ClusterIP
+  sessionAffinity: None
+---
+

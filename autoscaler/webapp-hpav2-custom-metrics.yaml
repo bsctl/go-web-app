@@ -1,0 +1,20 @@
+apiVersion: autoscaling/v2beta2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: webapp-hpav2-custom-metrics
+  namespace:
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: webapp
+  minReplicas: 1
+  maxReplicas: 10
+  metrics:
+    - type: Pods
+      pods:
+        metric:
+          name: http_requests_per_seconds
+        target:
+          type: AverageValue
+          averageValue: 50000m

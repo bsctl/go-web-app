@@ -1,4 +1,12 @@
-# An example of demo webapp.
+# A simple demo webapp
+Clone this repo on a local machine where `kubectl` is configured against the target Kubernetes cluster. The image is built from the provided `Dockerfile`:
+
+```
+docker build -t go-web-app:latest .
+Once the image is built, push it on your preferred repository.
+```
+
+## Deployment
 Use this webapp to demostrate the deployment strategies in Kubernetes.
 
 The app exposes ports:
@@ -34,4 +42,5 @@ And use the following query to see the requests ordered by `{{version}}`
 
     sum(rate(http_requests_total{run="webapp"}[5m])) by (version)
 
-That's all.
+## Horizontal Pod Autoscaler Walkthrough
+Use this webapp for an introduction to the HPA - Horizontal Pod Autoscaler. Refer to [autoscaler walkthrough](./autoscaler/README.md).
