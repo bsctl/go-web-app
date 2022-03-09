@@ -43,4 +43,4 @@ And use the following query to see the requests ordered by `{{version}}`
     sum(rate(http_requests_total{run="webapp"}[5m])) by (version)
 
 ## Horizontal Pod Autoscaler Walkthrough
-Use this webapp for an introduction to the HPA - Horizontal Pod Autoscaler. Refer to [autoscaler.md](./autoscaler/README-md).
+Use this webapp for an introduction to the HPA - Horizontal Pod Autoscaler. Refer to [autoscaler walkthrough](./autoscaler/README.md).
