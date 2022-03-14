@@ -100,6 +100,11 @@ func metricsHandler(handler http.Handler) http.Handler {
 	return promhttp.InstrumentHandlerCounter(requestsCounter, handler)
 }
 
+func delayHandler(w http.ResponseWriter, req *http.Request) {
+	time.Sleep(10 * time.Second)
+	fmt.Fprintf(w, "ok")
+}
+
 func main() {
 
 	// flags
@@ -118,6 +123,7 @@ func main() {
 	mux.HandleFunc("/load", loadHandler)
 	mux.HandleFunc("/ready", probeHandler)
 	mux.HandleFunc("/live", probeHandler)
+	mux.HandleFunc("/delay", delayHandler)
 
 	srv := &http.Server{
 		Addr:    *listenAddr,
