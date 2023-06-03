@@ -1,17 +1,18 @@
-apiVersion: extensions/v1beta1
+apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: webapp
   namespace:
-  labels:
-  annotations:
-    kubernetes.io/ingress.class: "traefik"
 spec:
+  ingressClassName: nginx
   rules:
   - host: webapp.cmp.local
     http:
       paths:
       - path: /
+        pathType: Prefix
         backend:
-          serviceName: webapp
-          servicePort: 80
+          service:
+            name: webapp
+            port:
+              number: 80
