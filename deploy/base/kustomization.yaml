@@ -1,0 +1,4 @@
+resources:
+- webapp-deploy-rolling.yaml
+- webapp-ingress.yaml
+- webapp-svc.yaml

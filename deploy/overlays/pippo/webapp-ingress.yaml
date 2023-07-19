@@ -1,0 +1,11 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: pippo
+spec:
+  rules:
+  - http:
+      paths:
+      - backend:
+          service:
+            name: pippo
