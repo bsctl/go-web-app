@@ -1,0 +1,6 @@
+bases:
+- ../../base
+patches:
+- webapp-deploy-rolling.yaml
+- webapp-ingress.yaml
+- webapp-svc.yaml

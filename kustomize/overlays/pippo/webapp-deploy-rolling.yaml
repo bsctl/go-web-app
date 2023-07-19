@@ -1,0 +1,13 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pippo
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      run: pippo
+  template:
+    metadata:
+      labels:
+        run: pippo
