@@ -2,7 +2,6 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: pippo
-  namespace: default
 spec:
   replicas: 3
   selector:
