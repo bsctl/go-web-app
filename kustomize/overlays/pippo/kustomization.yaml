@@ -1,3 +1,4 @@
+namePrefix: pippo-
 bases:
 - ../../base
 patches:
