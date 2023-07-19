@@ -6,7 +6,9 @@ spec:
   rules:
   - http:
       paths:
-      - backend:
+      - path: /
+        pathType: Prefix
+        backend:
           service:
             name: pippo
             port:
